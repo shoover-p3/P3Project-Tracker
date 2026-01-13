@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy Strength Workout Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .week-display {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        nav {
+            display: flex;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        nav button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        nav button.active {
+            background: #ecf0f1;
+            border-bottom-color: #3498db;
+            color: #3498db;
+        }
+
+        nav button:hover {
+            background: #ecf0f1;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+            font-size: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .exercise-inputs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .exercise-inputs input {
+            flex: 1;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .exercise-block {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+
+        .exercise-block h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .exercise-name {
+            font-weight: 600;
+            color: #3498db;
+            margin-bottom: 8px;
+        }
+
+        .exercise-details {
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+
+        .history {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #95a5a6;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            background: #e9ecef;
+            border-left-color: #3498db;
+        }
+
+        .history-date {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .history-details {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .history-exercises {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #ddd;
+            display: none;
+        }
+
+        .history-item.expanded .history-exercises {
+            display: block;
+        }
+
+        .history-exercise-line {
+            margin-bottom: 4px;
+        }
+
+        .notes-display {
+            font-size: 0.85rem;
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
+            padding: 5px;
+            background: #f0f0f0;
+            border-radius: 3px;
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+
+        .weight-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.2rem;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .weight-inputs {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .reset-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #ecf0f1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Easy Strength Workout Tracker</h1>
+        <div class="week-display" id="weekDisplay">Week 1 - Workout 1</div>
+    </header>
+
+    <nav>
+        <button class="active" onclick="showPage('workout')">Workout</button>
+        <button onclick="showPage('settings')">Settings</button>
+    </nav>
+
+    <div class="container">
+        <!-- WORKOUT PAGE -->
+        <div id="workoutPage" class="page active">
+            <div class="card">
+                <h2>Today's Workout</h2>
+                <div id="workoutContent"></div>
+                <button class="btn-success" onclick="completeWorkout()">Complete Workout</button>
+            </div>
+
+            <div class="card">
+                <h2>Recent History</h2>
+                <div id="historyContent" class="history"></div>
+            </div>
+        </div>
+
+        <!-- SETTINGS PAGE -->
+        <div id="settingsPage" class="page">
+            <div class="card">
+                <h2>Primary Movement</h2>
+                <div class="info-box">
+                    Easy Strength Protocol: Alternates 2x5 and 5x2 with progressive percentages over 4 weeks
+                </div>
+                <div class="form-group">
+                    <label>Exercise 1 (required)</label>
+                    <input type="text" id="primaryEx1" placeholder="e.g., Deadlift">
+                </div>
+                <div class="form-group">
+                    <label>Exercise 2 (optional - alternates with Exercise 1)</label>
+                    <input type="text" id="primaryEx2" placeholder="e.g., Trap Bar Deadlift">
+                </div>
+                <div class="form-group">
+                    <label>Estimated 1RM (pounds)</label>
+                    <input type="number" id="primary1RM" placeholder="e.g., 315">
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Upper Press</h2>
+                <div class="form-group">
+                    <label>Exercise 1 (required)</label>
+                    <input type="text" id="pressEx1" placeholder="e.g., Bench Press">
+                </div>
+                <div class="form-group">
+                    <label>Exercise 2 (optional)</label>
+                    <input type="text" id="pressEx2" placeholder="e.g., Overhead Press">
+                </div>
+                <div class="weight-inputs">
+                    <div class="form-group">
+                        <label>Sets x Reps for Weight A</label>
+                        <input type="text" id="pressSetsRepsA" placeholder="e.g., 3x10">
+                    </div>
+                    <div class="form-group">
+                        <label>Sets x Reps for Weight B</label>
+                        <input type="text" id="pressSetsRepsB" placeholder="e.g., 3x8">
+                    </div>
+                </div>
+                <div class="weight-inputs">
+                    <div class="form-group">
+                        <label>Weight A (lbs)</label>
+                        <input type="number" id="pressWeightA" placeholder="e.g., 135">
+                    </div>
+                    <div class="form-group">
+                        <label>Weight B (lbs)</label>
+                        <input type="number" id="pressWeightB" placeholder="e.g., 135">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Upper Pull</h2>
+                <div class="form-group">
+                    <label>Exercise 1 (required)</label>
+                    <input type="text" id="pullEx1" placeholder="e.g., Pull-ups">
+                </div>
+                <div class="form-group">
+                    <label>Exercise 2 (optional)</label>
+                    <input type="text" id="pullEx2" placeholder="e.g., Rows">
+                </div>
+                <div class="weight-inputs">
+                    <div class="form-group">
+                        <label>Sets x Reps for Weight A</label>
+                        <input type="text" id="pullSetsRepsA" placeholder="e.g., 3x8">
+                    </div>
+                    <div class="form-group">
+                        <label>Sets x Reps for Weight B</label>
+                        <input type="text" id="pullSetsRepsB" placeholder="e.g., 3x10">
+                    </div>
+                </div>
+                <div class="weight-inputs">
+                    <div class="form-group">
+                        <label>Weight A (lbs)</label>
+                        <input type="number" id="pullWeightA" placeholder="e.g., BW or 0">
+                    </div>
+                    <div class="form-group">
+                        <label>Weight B (lbs)</label>
+                        <input type="number" id="pullWeightB" placeholder="e.g., BW or 0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Lower Push</h2>
+                <div class="form-group">
+                    <label>Exercise 1 (required)</label>
+                    <input type="text" id="lowerEx1" placeholder="e.g., Squat">
+                </div>
+                <div class="form-group">
+                    <label>Exercise 2 (optional)</label>
+                    <input type="text" id="lowerEx2" placeholder="e.g., Front Squat">
+                </div>
+                <div class="weight-inputs">
+                    <div class="form-group">
+                        <label>Sets x Reps for Weight A</label>
+                        <input type="text" id="lowerSetsRepsA" placeholder="e.g., 3x5">
+                    </div>
+                    <div class="form-group">
+                        <label>Sets x Reps for Weight B</label>
+                        <input type="text" id="lowerSetsRepsB" placeholder="e.g., 3x8">
+                    </div>
+                </div>
+                <div class="weight-inputs">
+                    <div class="form-group">
+                        <label>Weight A (lbs)</label>
+                        <input type="number" id="lowerWeightA" placeholder="e.g., 225">
+                    </div>
+                    <div class="form-group">
+                        <label>Weight B (lbs)</label>
+                        <input type="number" id="lowerWeightB" placeholder="e.g., 225">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Finisher</h2>
+                <div class="form-group">
+                    <label>Exercise 1 (required)</label>
+                    <input type="text" id="finisherEx1" placeholder="e.g., Kettlebell Swings">
+                </div>
+                <div class="form-group">
+                    <label>Exercise 2 (optional)</label>
+                    <input type="text" id="finisherEx2" placeholder="e.g., Sled Push">
+                </div>
+                <div class="weight-inputs">
+                    <div class="form-group">
+                        <label>Sets x Reps for Weight A</label>
+                        <input type="text" id="finisherSetsRepsA" placeholder="e.g., 3x15">
+                    </div>
+                    <div class="form-group">
+                        <label>Sets x Reps for Weight B</label>
+                        <input type="text" id="finisherSetsRepsB" placeholder="e.g., 3x20">
+                    </div>
+                </div>
+                <div class="weight-inputs">
+                    <div class="form-group">
+                        <label>Weight A (lbs)</label>
+                        <input type="number" id="finisherWeightA" placeholder="e.g., 53">
+                    </div>
+                    <div class="form-group">
+                        <label>Weight B (lbs)</label>
+                        <input type="number" id="finisherWeightB" placeholder="e.g., 53">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <button onclick="saveSettings()">Save Settings</button>
+                <div class="reset-section">
+                    <h2>Reset Program</h2>
+                    <p style="margin-bottom: 10px; color: #555;">This will reset your progress back to Week 1, Workout 1</p>
+                    <button class="btn-danger" onclick="resetProgram()">Reset to Week 1</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default data structure
+        const defaultData = {
+            currentWeek: 1,
+            currentWorkout: 1,
+            primary: { ex1: '', ex2: '', oneRM: 0 },
+            press: { ex1: '', ex2: '', setsRepsA: '3x10', setsRepsB: '3x10', weightA: 0, weightB: 0 },
+            pull: { ex1: '', ex2: '', setsRepsA: '3x8', setsRepsB: '3x8', weightA: 0, weightB: 0 },
+            lower: { ex1: '', ex2: '', setsRepsA: '3x5', setsRepsB: '3x5', weightA: 0, weightB: 0 },
+            finisher: { ex1: '', ex2: '', setsRepsA: '3x15', setsRepsB: '3x15', weightA: 0, weightB: 0 },
+            history: []
+        };
+
+        // Primary movement progression table
+        const primaryProgression = {
+            1: { '2x5': 0.65, '5x2': 0.70 },
+            2: { '2x5': 0.675, '5x2': 0.725 },
+            3: { '2x5': 0.70, '5x2': 0.75 },
+            4: { '2x5': 0.725, '5x2': 0.775 }
+        };
+
+        // Load data from localStorage
+        function loadData() {
+            const saved = localStorage.getItem('workoutTrackerData');
+            return saved ? JSON.parse(saved) : { ...defaultData };
+        }
+
+        // Save data to localStorage
+        function saveData(data) {
+            localStorage.setItem('workoutTrackerData', JSON.stringify(data));
+        }
+
+        // Initialize data
+        let data = loadData();
+
+        // Page navigation
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+
+            if (pageName === 'workout') {
+                document.getElementById('workoutPage').classList.add('active');
+                document.querySelectorAll('nav button')[0].classList.add('active');
+                renderWorkout();
+            } else {
+                document.getElementById('settingsPage').classList.add('active');
+                document.querySelectorAll('nav button')[1].classList.add('active');
+                loadSettings();
+            }
+        }
+
+        // Update week display
+        function updateWeekDisplay() {
+            document.getElementById('weekDisplay').textContent =
+                `Week ${data.currentWeek} - Workout ${data.currentWorkout}`;
+        }
+
+        // Determine which exercise to use (alternation logic)
+        function getExercise(ex1, ex2) {
+            if (!ex2) return ex1;
+            // Odd workouts (1,3,5,7) = Exercise 1, Even workouts (2,4,6,8) = Exercise 2
+            return (data.currentWorkout % 2 === 1) ? ex1 : ex2;
+        }
+
+        // Get weight for alternating exercises
+        function getWeight(weightA, weightB, ex1, ex2) {
+            if (!ex2) return weightA;
+            return (data.currentWorkout % 2 === 1) ? weightA : weightB;
+        }
+
+        // Get sets/reps for alternating exercises
+        function getSetsReps(setsRepsA, setsRepsB, ex1, ex2) {
+            if (!ex2) return setsRepsA;
+            return (data.currentWorkout % 2 === 1) ? setsRepsA : setsRepsB;
+        }
+
+        // Calculate primary movement weight and scheme
+        function getPrimaryMovement() {
+            const week = data.currentWeek;
+            const workout = data.currentWorkout;
+
+            // Determine if this is a 2x5 or 5x2 workout (alternates each workout)
+            const scheme = (workout % 2 === 1) ? '2x5' : '5x2';
+            const percentage = primaryProgression[week][scheme];
+            const weight = Math.round(data.primary.oneRM * percentage / 5) * 5; // Round to nearest 5
+
+            return { scheme, weight, percentage };
+        }
+
+        // Parse sets and reps (e.g., "3x10" -> {sets: 3, reps: 10})
+        function parseSetsReps(str) {
+            const parts = str.split('x');
+            return {
+                sets: parseInt(parts[0]) || 3,
+                reps: parseInt(parts[1]) || 10
+            };
+        }
+
+        // Render workout page
+        function renderWorkout() {
+            updateWeekDisplay();
+
+            const content = document.getElementById('workoutContent');
+            let html = '';
+
+            // Primary Movement
+            if (data.primary.ex1 && data.primary.oneRM > 0) {
+                const primary = getPrimaryMovement();
+                const exercise = getExercise(data.primary.ex1, data.primary.ex2);
+                html += `
+                    <div class="exercise-block">
+                        <h3>Primary Movement</h3>
+                        <div class="exercise-name">${exercise}</div>
+                        <div class="exercise-details">
+                            ${primary.scheme} @ ${primary.weight} lbs
+                            (${Math.round(primary.percentage * 100)}% of 1RM)
+                        </div>
+                        <div class="form-group" style="margin-top: 10px;">
+                            <label>Notes (RPE, comments, etc.)</label>
+                            <textarea id="primaryNotes" placeholder="e.g., RPE 8, felt strong"></textarea>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Upper Press
+            if (data.press.ex1) {
+                const exercise = getExercise(data.press.ex1, data.press.ex2);
+                const weight = getWeight(data.press.weightA, data.press.weightB, data.press.ex1, data.press.ex2);
+                const setsReps = getSetsReps(data.press.setsRepsA, data.press.setsRepsB, data.press.ex1, data.press.ex2);
+                html += `
+                    <div class="exercise-block">
+                        <h3>Upper Press</h3>
+                        <div class="exercise-name">${exercise}</div>
+                        <div class="exercise-details">
+                            ${setsReps} @ ${weight} lbs
+                        </div>
+                        <div class="form-group" style="margin-top: 10px;">
+                            <label>Notes (RPE, comments, etc.)</label>
+                            <textarea id="pressNotes" placeholder="e.g., RPE 7, good form"></textarea>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Upper Pull
+            if (data.pull.ex1) {
+                const exercise = getExercise(data.pull.ex1, data.pull.ex2);
+                const weight = getWeight(data.pull.weightA, data.pull.weightB, data.pull.ex1, data.pull.ex2);
+                const setsReps = getSetsReps(data.pull.setsRepsA, data.pull.setsRepsB, data.pull.ex1, data.pull.ex2);
+                html += `
+                    <div class="exercise-block">
+                        <h3>Upper Pull</h3>
+                        <div class="exercise-name">${exercise}</div>
+                        <div class="exercise-details">
+                            ${setsReps} @ ${weight} lbs
+                        </div>
+                        <div class="form-group" style="margin-top: 10px;">
+                            <label>Notes (RPE, comments, etc.)</label>
+                            <textarea id="pullNotes" placeholder="e.g., RPE 9, tough set"></textarea>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Lower Push
+            if (data.lower.ex1) {
+                const exercise = getExercise(data.lower.ex1, data.lower.ex2);
+                const weight = getWeight(data.lower.weightA, data.lower.weightB, data.lower.ex1, data.lower.ex2);
+                const setsReps = getSetsReps(data.lower.setsRepsA, data.lower.setsRepsB, data.lower.ex1, data.lower.ex2);
+                html += `
+                    <div class="exercise-block">
+                        <h3>Lower Push</h3>
+                        <div class="exercise-name">${exercise}</div>
+                        <div class="exercise-details">
+                            ${setsReps} @ ${weight} lbs
+                        </div>
+                        <div class="form-group" style="margin-top: 10px;">
+                            <label>Notes (RPE, comments, etc.)</label>
+                            <textarea id="lowerNotes" placeholder="e.g., RPE 8, depth good"></textarea>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Finisher
+            if (data.finisher.ex1) {
+                const exercise = getExercise(data.finisher.ex1, data.finisher.ex2);
+                const weight = getWeight(data.finisher.weightA, data.finisher.weightB, data.finisher.ex1, data.finisher.ex2);
+                const setsReps = getSetsReps(data.finisher.setsRepsA, data.finisher.setsRepsB, data.finisher.ex1, data.finisher.ex2);
+                html += `
+                    <div class="exercise-block">
+                        <h3>Finisher</h3>
+                        <div class="exercise-name">${exercise}</div>
+                        <div class="exercise-details">
+                            ${setsReps} @ ${weight} lbs
+                        </div>
+                        <div class="form-group" style="margin-top: 10px;">
+                            <label>Notes (RPE, comments, etc.)</label>
+                            <textarea id="finisherNotes" placeholder="e.g., RPE 10, brutal"></textarea>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (!html) {
+                html = '<p style="text-align: center; color: #999; padding: 20px;">No exercises configured. Go to Settings to set up your workout.</p>';
+            }
+
+            content.innerHTML = html;
+            renderHistory();
+        }
+
+
+        // Render workout history
+        function renderHistory() {
+            const historyContent = document.getElementById('historyContent');
+
+            if (data.history.length === 0) {
+                historyContent.innerHTML = '<p style="text-align: center; color: #999;">No workout history yet.</p>';
+                return;
+            }
+
+            const recentHistory = data.history.slice(-5).reverse();
+            let html = '';
+
+            recentHistory.forEach((item, index) => {
+                const exercises = item.exercises || [];
+                let exercisesHtml = '';
+
+                exercises.forEach(ex => {
+                    exercisesHtml += `<div class="history-exercise-line"><strong>${ex.category}:</strong> ${ex.name} - ${ex.details}`;
+                    if (ex.notes) {
+                        exercisesHtml += `<br><em style="color: #777; font-size: 0.9em;">Notes: ${ex.notes}</em>`;
+                    }
+                    exercisesHtml += `</div>`;
+                });
+
+                html += `
+                    <div class="history-item" onclick="toggleHistoryItem(${index})">
+                        <div class="history-date">${item.date}</div>
+                        <div class="history-details">Week ${item.week}, Workout ${item.workout} - Click to expand</div>
+                        <div class="history-exercises">
+                            ${exercisesHtml || '<em>No exercise details recorded</em>'}
+                        </div>
+                    </div>
+                `;
+            });
+
+            historyContent.innerHTML = html;
+        }
+
+        // Toggle history item expansion
+        function toggleHistoryItem(index) {
+            const historyItems = document.querySelectorAll('.history-item');
+            if (historyItems[index]) {
+                historyItems[index].classList.toggle('expanded');
+            }
+        }
+
+        // Complete workout and advance
+        function completeWorkout() {
+            if (!data.primary.ex1 || data.primary.oneRM === 0) {
+                alert('Please configure your exercises in Settings first.');
+                return;
+            }
+
+            // Capture current workout details
+            const exercises = [];
+
+            // Primary Movement
+            if (data.primary.ex1 && data.primary.oneRM > 0) {
+                const primary = getPrimaryMovement();
+                const exercise = getExercise(data.primary.ex1, data.primary.ex2);
+                const notes = document.getElementById('primaryNotes')?.value || '';
+                exercises.push({
+                    category: 'Primary Movement',
+                    name: exercise,
+                    details: `${primary.scheme} @ ${primary.weight} lbs (${Math.round(primary.percentage * 100)}% of 1RM)`,
+                    notes: notes
+                });
+            }
+
+            // Upper Press
+            if (data.press.ex1) {
+                const exercise = getExercise(data.press.ex1, data.press.ex2);
+                const weight = getWeight(data.press.weightA, data.press.weightB, data.press.ex1, data.press.ex2);
+                const setsReps = getSetsReps(data.press.setsRepsA, data.press.setsRepsB, data.press.ex1, data.press.ex2);
+                const notes = document.getElementById('pressNotes')?.value || '';
+                exercises.push({
+                    category: 'Upper Press',
+                    name: exercise,
+                    details: `${setsReps} @ ${weight} lbs`,
+                    notes: notes
+                });
+            }
+
+            // Upper Pull
+            if (data.pull.ex1) {
+                const exercise = getExercise(data.pull.ex1, data.pull.ex2);
+                const weight = getWeight(data.pull.weightA, data.pull.weightB, data.pull.ex1, data.pull.ex2);
+                const setsReps = getSetsReps(data.pull.setsRepsA, data.pull.setsRepsB, data.pull.ex1, data.pull.ex2);
+                const notes = document.getElementById('pullNotes')?.value || '';
+                exercises.push({
+                    category: 'Upper Pull',
+                    name: exercise,
+                    details: `${setsReps} @ ${weight} lbs`,
+                    notes: notes
+                });
+            }
+
+            // Lower Push
+            if (data.lower.ex1) {
+                const exercise = getExercise(data.lower.ex1, data.lower.ex2);
+                const weight = getWeight(data.lower.weightA, data.lower.weightB, data.lower.ex1, data.lower.ex2);
+                const setsReps = getSetsReps(data.lower.setsRepsA, data.lower.setsRepsB, data.lower.ex1, data.lower.ex2);
+                const notes = document.getElementById('lowerNotes')?.value || '';
+                exercises.push({
+                    category: 'Lower Push',
+                    name: exercise,
+                    details: `${setsReps} @ ${weight} lbs`,
+                    notes: notes
+                });
+            }
+
+            // Finisher
+            if (data.finisher.ex1) {
+                const exercise = getExercise(data.finisher.ex1, data.finisher.ex2);
+                const weight = getWeight(data.finisher.weightA, data.finisher.weightB, data.finisher.ex1, data.finisher.ex2);
+                const setsReps = getSetsReps(data.finisher.setsRepsA, data.finisher.setsRepsB, data.finisher.ex1, data.finisher.ex2);
+                const notes = document.getElementById('finisherNotes')?.value || '';
+                exercises.push({
+                    category: 'Finisher',
+                    name: exercise,
+                    details: `${setsReps} @ ${weight} lbs`,
+                    notes: notes
+                });
+            }
+
+            // Add to history
+            data.history.push({
+                date: new Date().toLocaleDateString(),
+                week: data.currentWeek,
+                workout: data.currentWorkout,
+                exercises: exercises
+            });
+
+            // Advance to next workout
+            data.currentWorkout++;
+
+            // Check if we need to advance to next week
+            if (data.currentWorkout > 2) {
+                data.currentWorkout = 1;
+                data.currentWeek++;
+            }
+
+            // Check if we've completed the 4-week cycle
+            if (data.currentWeek > 4) {
+                data.currentWeek = 1;
+                data.currentWorkout = 1;
+                alert('Congratulations! You completed the 4-week cycle. Starting over at Week 1.');
+            }
+
+            saveData(data);
+            renderWorkout();
+        }
+
+        // Load settings into form
+        function loadSettings() {
+            document.getElementById('primaryEx1').value = data.primary.ex1;
+            document.getElementById('primaryEx2').value = data.primary.ex2;
+            document.getElementById('primary1RM').value = data.primary.oneRM || '';
+
+            document.getElementById('pressEx1').value = data.press.ex1;
+            document.getElementById('pressEx2').value = data.press.ex2;
+            document.getElementById('pressSetsRepsA').value = data.press.setsRepsA || '3x10';
+            document.getElementById('pressSetsRepsB').value = data.press.setsRepsB || '3x10';
+            document.getElementById('pressWeightA').value = data.press.weightA || '';
+            document.getElementById('pressWeightB').value = data.press.weightB || '';
+
+            document.getElementById('pullEx1').value = data.pull.ex1;
+            document.getElementById('pullEx2').value = data.pull.ex2;
+            document.getElementById('pullSetsRepsA').value = data.pull.setsRepsA || '3x8';
+            document.getElementById('pullSetsRepsB').value = data.pull.setsRepsB || '3x8';
+            document.getElementById('pullWeightA').value = data.pull.weightA || '';
+            document.getElementById('pullWeightB').value = data.pull.weightB || '';
+
+            document.getElementById('lowerEx1').value = data.lower.ex1;
+            document.getElementById('lowerEx2').value = data.lower.ex2;
+            document.getElementById('lowerSetsRepsA').value = data.lower.setsRepsA || '3x5';
+            document.getElementById('lowerSetsRepsB').value = data.lower.setsRepsB || '3x5';
+            document.getElementById('lowerWeightA').value = data.lower.weightA || '';
+            document.getElementById('lowerWeightB').value = data.lower.weightB || '';
+
+            document.getElementById('finisherEx1').value = data.finisher.ex1;
+            document.getElementById('finisherEx2').value = data.finisher.ex2;
+            document.getElementById('finisherSetsRepsA').value = data.finisher.setsRepsA || '3x15';
+            document.getElementById('finisherSetsRepsB').value = data.finisher.setsRepsB || '3x15';
+            document.getElementById('finisherWeightA').value = data.finisher.weightA || '';
+            document.getElementById('finisherWeightB').value = data.finisher.weightB || '';
+        }
+
+        // Save settings from form
+        function saveSettings() {
+            data.primary.ex1 = document.getElementById('primaryEx1').value;
+            data.primary.ex2 = document.getElementById('primaryEx2').value;
+            data.primary.oneRM = parseFloat(document.getElementById('primary1RM').value) || 0;
+
+            data.press.ex1 = document.getElementById('pressEx1').value;
+            data.press.ex2 = document.getElementById('pressEx2').value;
+            data.press.setsRepsA = document.getElementById('pressSetsRepsA').value;
+            data.press.setsRepsB = document.getElementById('pressSetsRepsB').value;
+            data.press.weightA = parseFloat(document.getElementById('pressWeightA').value) || 0;
+            data.press.weightB = parseFloat(document.getElementById('pressWeightB').value) || 0;
+
+            data.pull.ex1 = document.getElementById('pullEx1').value;
+            data.pull.ex2 = document.getElementById('pullEx2').value;
+            data.pull.setsRepsA = document.getElementById('pullSetsRepsA').value;
+            data.pull.setsRepsB = document.getElementById('pullSetsRepsB').value;
+            data.pull.weightA = parseFloat(document.getElementById('pullWeightA').value) || 0;
+            data.pull.weightB = parseFloat(document.getElementById('pullWeightB').value) || 0;
+
+            data.lower.ex1 = document.getElementById('lowerEx1').value;
+            data.lower.ex2 = document.getElementById('lowerEx2').value;
+            data.lower.setsRepsA = document.getElementById('lowerSetsRepsA').value;
+            data.lower.setsRepsB = document.getElementById('lowerSetsRepsB').value;
+            data.lower.weightA = parseFloat(document.getElementById('lowerWeightA').value) || 0;
+            data.lower.weightB = parseFloat(document.getElementById('lowerWeightB').value) || 0;
+
+            data.finisher.ex1 = document.getElementById('finisherEx1').value;
+            data.finisher.ex2 = document.getElementById('finisherEx2').value;
+            data.finisher.setsRepsA = document.getElementById('finisherSetsRepsA').value;
+            data.finisher.setsRepsB = document.getElementById('finisherSetsRepsB').value;
+            data.finisher.weightA = parseFloat(document.getElementById('finisherWeightA').value) || 0;
+            data.finisher.weightB = parseFloat(document.getElementById('finisherWeightB').value) || 0;
+
+            saveData(data);
+            alert('Settings saved successfully!');
+        }
+
+        // Reset program
+        function resetProgram() {
+            if (confirm('Are you sure you want to reset to Week 1, Workout 1? This cannot be undone.')) {
+                data.currentWeek = 1;
+                data.currentWorkout = 1;
+                saveData(data);
+                updateWeekDisplay();
+                alert('Program reset to Week 1, Workout 1.');
+                showPage('workout');
+            }
+        }
+
+        // Initialize on load
+        updateWeekDisplay();
+        renderWorkout();
+    </script>
+</body>
+</html>
