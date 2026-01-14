@@ -1,0 +1,52 @@
+================================================================================
+TREASURY FUTURES STRATEGY BACKTEST
+================================================================================
+
+1. Loading Configuration...
+  Date Range: 2016-01-17 to 2026-01-14
+  Total Exposure: $200.0mm
+  Tiered MA: 50% ($100.0mm)
+  MonthEnd: 50% ($100.0mm)
+
+2. Data Acquisition...
+
+================================================================================
+DATA ACQUISITION
+================================================================================
+
+  WARNING: Bloomberg not available: No module named 'blpapi'
+  -> Falling back to synthetic data for testing
+
+  Using SYNTHETIC DATA for testing
+  ============================================================================
+
+  Generating 2608 days of synthetic data...
+Traceback (most recent call last):
+  File "C:\Users\SHoover\ClaudeProjects\UST MA and EOM\treasury_strategy\data_loader.py", line 53, in fetch_data
+    import blpapi  # Test this first
+    ^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'blpapi'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\SHoover\ClaudeProjects\UST MA and EOM\treasury_strategy\main.py", line 245, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\SHoover\ClaudeProjects\UST MA and EOM\treasury_strategy\main.py", line 76, in main
+    data = data_loader.fetch_data(
+        start_date=backtest_config.start_date,
+        end_date=backtest_config.end_date
+    )
+  File "C:\Users\SHoover\ClaudeProjects\UST MA and EOM\treasury_strategy\data_loader.py", line 59, in fetch_data
+    return self._fetch_synthetic_data(start_date, end_date)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SHoover\ClaudeProjects\UST MA and EOM\treasury_strategy\data_loader.py", line 124, in _fetch_synthetic_data
+    data = generate_synthetic_treasury_data(start_date, end_date)
+  File "C:\Users\SHoover\ClaudeProjects\UST MA and EOM\treasury_strategy\synthetic_data.py", line 112, in generate_synthetic_treasury_data
+    print(f"  \u2713 Generated data: {len(df)} observations")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SHoover\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2713' in position 2: character maps to <undefined>

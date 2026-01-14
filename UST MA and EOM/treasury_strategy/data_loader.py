@@ -13,22 +13,25 @@ class DataLoader:
     """Handles data acquisition and preprocessing for backtesting."""
 
     def __init__(self, treasury_ticker: str = 'TY1 Comdty',
-                 equity_ticker: str = 'SPX Index'):
+                 equity_ticker: str = 'SPX Index',
+                 use_synthetic: bool = False):
         """
         Initialize DataLoader.
 
         Args:
             treasury_ticker: Bloomberg ticker for Treasury futures
             equity_ticker: Bloomberg ticker for equity index (correlation filter)
+            use_synthetic: If True, use synthetic data instead of Bloomberg
         """
         self.treasury_ticker = treasury_ticker
         self.equity_ticker = equity_ticker
+        self.use_synthetic = use_synthetic
         self.raw_data = None
         self.processed_data = None
 
     def fetch_data(self, start_date: datetime, end_date: datetime) -> pd.DataFrame:
         """
-        Fetch market data from Bloomberg.
+        Fetch market data from Bloomberg or generate synthetic data.
 
         Args:
             start_date: Start date for data
@@ -37,11 +40,23 @@ class DataLoader:
         Returns:
             Combined DataFrame with Treasury and equity data
         """
-        from xbbg import blp
-
         print(f"\n{'='*80}")
         print("DATA ACQUISITION")
         print(f"{'='*80}")
+
+        # Use synthetic data if requested or if Bloomberg not available
+        if self.use_synthetic:
+            return self._fetch_synthetic_data(start_date, end_date)
+
+        # Try to import Bloomberg API
+        try:
+            import blpapi  # Test this first
+            from xbbg import blp
+        except (ImportError, ModuleNotFoundError, Exception) as e:
+            print(f"\n  WARNING: Bloomberg not available: {str(e)[:100]}")
+            print("  -> Falling back to synthetic data for testing")
+            self.use_synthetic = True
+            return self._fetch_synthetic_data(start_date, end_date)
 
         # Fetch Treasury futures data
         print(f"\nFetching {self.treasury_ticker}...")
@@ -56,11 +71,11 @@ class DataLoader:
             ty_data.columns = ['_'.join(col).strip() for col in ty_data.columns.values]
             ty_data.columns = ['open', 'high', 'low', 'close', 'volume']
 
-            print(f"  ✓ Treasury data: {len(ty_data)} observations")
-            print(f"  ✓ Date range: {ty_data.index[0]} to {ty_data.index[-1]}")
+            print(f"  [OK] Treasury data: {len(ty_data)} observations")
+            print(f"  [OK] Date range: {ty_data.index[0]} to {ty_data.index[-1]}")
 
         except Exception as e:
-            print(f"  ✗ Error: {e}")
+            print(f"  [ERROR] {e}")
             raise
 
         # Fetch equity index data
@@ -75,10 +90,10 @@ class DataLoader:
 
             spx_data.columns = ['spx_close']
 
-            print(f"  ✓ Equity data: {len(spx_data)} observations")
+            print(f"  [OK] Equity data: {len(spx_data)} observations")
 
         except Exception as e:
-            print(f"  ✗ Error: {e}")
+            print(f"  [ERROR] {e}")
             raise
 
         # Merge data
@@ -86,6 +101,31 @@ class DataLoader:
 
         print(f"\n  Combined dataset: {len(data)} observations")
         print(f"  Missing values: {data.isnull().sum().sum()}")
+
+        self.raw_data = data
+        return data
+
+    def _fetch_synthetic_data(self, start_date: datetime, end_date: datetime) -> pd.DataFrame:
+        """
+        Generate synthetic data for testing when Bloomberg is not available.
+
+        Args:
+            start_date: Start date
+            end_date: End date
+
+        Returns:
+            DataFrame with synthetic Treasury and equity data
+        """
+        from synthetic_data import generate_synthetic_treasury_data
+
+        print("\n  Using SYNTHETIC DATA for testing")
+        print("  " + "="*76)
+
+        data = generate_synthetic_treasury_data(start_date, end_date)
+
+        # Rename columns to match expected format
+        if 'returns' in data.columns:
+            data = data.drop('returns', axis=1)  # Will be recalculated
 
         self.raw_data = data
         return data
@@ -123,24 +163,24 @@ class DataLoader:
         for period in ma_periods:
             data[f'ma_{period}'] = data['price'].rolling(period).mean()
 
-        print(f"  ✓ Moving averages calculated: {ma_periods}")
+        print(f"  [OK] Moving averages calculated: {ma_periods}")
 
         # Equity returns and correlation
         data['spx_returns'] = data['spx_close'].pct_change()
         data['ty_spx_corr_{0}d'.format(correlation_window)] = \
             data['returns'].rolling(correlation_window).corr(data['spx_returns'])
 
-        print(f"  ✓ TY/SPX correlation calculated ({correlation_window}-day rolling)")
+        print(f"  [OK] TY/SPX correlation calculated ({correlation_window}-day rolling)")
 
         # Additional technical indicators (for research)
         data['atr_14'] = self._calculate_atr(data, period=14)
         data['rsi_14'] = self._calculate_rsi(data['price'], period=14)
 
-        print(f"  ✓ Additional indicators: ATR(14), RSI(14)")
+        print(f"  [OK] Additional indicators: ATR(14), RSI(14)")
 
         # Clean data
         data_clean = data.dropna()
-        print(f"  ✓ Clean data: {len(data_clean)} observations (after removing NaN)")
+        print(f"  [OK] Clean data: {len(data_clean)} observations (after removing NaN)")
 
         self.processed_data = data_clean
         return data_clean
@@ -189,6 +229,10 @@ class DataLoader:
         else:
             data = data.copy()
 
+        # Ensure index is DatetimeIndex
+        if not isinstance(data.index, pd.DatetimeIndex):
+            data.index = pd.to_datetime(data.index)
+
         # Date features
         data['year'] = data.index.year
         data['month'] = data.index.month
@@ -219,11 +263,11 @@ class DataLoader:
             raise ValueError("No data to save.")
 
         data.to_csv(filename)
-        print(f"  ✓ Data saved to {filename}")
+        print(f"  [OK] Data saved to {filename}")
 
     def load_data(self, filename: str) -> pd.DataFrame:
         """Load previously saved data from CSV."""
         data = pd.read_csv(filename, index_col=0, parse_dates=True)
         self.processed_data = data
-        print(f"  ✓ Data loaded from {filename}")
+        print(f"  [OK] Data loaded from {filename}")
         return data

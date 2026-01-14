@@ -69,7 +69,8 @@ def main():
 
     data_loader = DataLoader(
         treasury_ticker=backtest_config.treasury_ticker,
-        equity_ticker=backtest_config.equity_ticker
+        equity_ticker=backtest_config.equity_ticker,
+        use_synthetic=False  # Force real Bloomberg data
     )
 
     # Fetch data
@@ -104,9 +105,9 @@ def main():
         exposure_mm=backtest_config.total_exposure_mm
     )
 
-    print(f"  ✓ Tiered MA Strategy (${backtest_config.tiered_base_mm}mm base)")
-    print(f"  ✓ MonthEnd Strategy (${backtest_config.monthend_base_mm}mm base)")
-    print(f"  ✓ Buy & Hold Benchmark (${backtest_config.total_exposure_mm}mm)")
+    print(f"  [OK] Tiered MA Strategy (${backtest_config.tiered_base_mm}mm base)")
+    print(f"  [OK] MonthEnd Strategy (${backtest_config.monthend_base_mm}mm base)")
+    print(f"  [OK] Buy & Hold Benchmark (${backtest_config.total_exposure_mm}mm)")
 
     # ========================================================================
     # BACKTESTING
@@ -225,14 +226,14 @@ def main():
     print("="*80)
 
     std_metrics = comparison[comparison['strategy'] == 'Standard_Portfolio'].iloc[0]
-    print(f"\n📊 STANDARD PORTFOLIO (${backtest_config.total_exposure_mm}mm exposure):")
+    print(f"\n[RESULTS] STANDARD PORTFOLIO (${backtest_config.total_exposure_mm}mm exposure):")
     print(f"   Annual Return:  {std_metrics['annual_return_%']:>6.2f}%")
     print(f"   Annual P&L:     ${std_metrics['annual_pnl_mm']:>6.1f}mm")
     print(f"   Sharpe Ratio:   {std_metrics['sharpe']:>7.2f}")
     print(f"   Max Drawdown:   {std_metrics['max_dd_%']:>6.2f}%")
     print(f"   Win Rate:       {std_metrics['win_rate_%']:>6.1f}%")
 
-    print(f"\n📁 Files Generated:")
+    print(f"\n[FILES] Files Generated:")
     print(f"   Excel: {excel_filename}")
     print(f"   Charts: {output_dir}/")
 

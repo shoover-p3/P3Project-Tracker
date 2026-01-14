@@ -283,7 +283,7 @@ class MonthEndResearcher:
 
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"  ✓ Window optimization plot saved to {save_path}")
+            print(f"  [OK] Window optimization plot saved to {save_path}")
         else:
             plt.show()
 
@@ -351,7 +351,7 @@ class MonthEndResearcher:
 
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"  ✓ Intra-month patterns plot saved to {save_path}")
+            print(f"  [OK] Intra-month patterns plot saved to {save_path}")
         else:
             plt.show()
 
@@ -411,7 +411,7 @@ def main():
         if not quarter_results.empty:
             quarter_results.to_excel(writer, sheet_name='Quarter_End_Analysis', index=False)
 
-    print(f"  ✓ Results saved to ./output/research/monthend_research_{timestamp}.xlsx")
+    print(f"  [OK] Results saved to ./output/research/monthend_research_{timestamp}.xlsx")
 
     print("\n" + "="*80)
     print("RESEARCH COMPLETE")

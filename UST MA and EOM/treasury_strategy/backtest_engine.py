@@ -118,6 +118,13 @@ class BacktestEngine:
             comp_results = pd.DataFrame(index=self.data.index)
             comp_results['exposure_mm'] = exposure_mm
             comp_results['pnl_daily'] = pnl_daily
+            comp_results['returns'] = self.data['returns']
+
+            # Calculate equity curve and drawdown for component
+            comp_results['equity_curve'] = (1 + pnl_daily / exposure_mm.abs().mean()).cumprod()
+            comp_results['cummax'] = comp_results['equity_curve'].expanding().max()
+            comp_results['drawdown'] = (comp_results['equity_curve'] - comp_results['cummax']) / comp_results['cummax']
+
             self.results[name] = comp_results
 
             # Print stats
@@ -294,7 +301,7 @@ class BacktestEngine:
             # Summary comparison
             comparison = self.compare_strategies(strategy_names)
             comparison.to_excel(writer, sheet_name='Performance_Summary', index=False)
-            print(f"  ✓ Performance summary exported")
+            print(f"  [OK] Performance summary exported")
 
             # Daily results for each strategy
             for name in strategy_names:
@@ -304,7 +311,7 @@ class BacktestEngine:
                 results = self.results[name]
                 results.to_excel(writer, sheet_name=f'{name[:30]}_Daily')
 
-            print(f"  ✓ Daily results exported for {len(strategy_names)} strategies")
+            print(f"  [OK] Daily results exported for {len(strategy_names)} strategies")
 
             # Monthly/Quarterly/Annual aggregations
             for period, sheet_suffix in [('M', 'Monthly'), ('Q', 'Quarterly'), ('Y', 'Annual')]:
@@ -318,6 +325,6 @@ class BacktestEngine:
 
                 if not agg_df.empty:
                     agg_df.to_excel(writer, sheet_name=f'{sheet_suffix}_Returns')
-                    print(f"  ✓ {sheet_suffix} returns exported")
+                    print(f"  [OK] {sheet_suffix} returns exported")
 
-        print(f"\n  ✓ Excel file saved: {filename}")
+        print(f"\n  [OK] Excel file saved: {filename}")

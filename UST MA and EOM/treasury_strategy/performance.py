@@ -75,7 +75,7 @@ class PerformanceAnalyzer:
 
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"  ✓ Equity curves saved to {save_path}")
+            print(f"  [OK] Equity curves saved to {save_path}")
         else:
             plt.show()
 
@@ -155,7 +155,7 @@ class PerformanceAnalyzer:
 
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"  ✓ Performance dashboard saved to {save_path}")
+            print(f"  [OK] Performance dashboard saved to {save_path}")
         else:
             plt.show()
 
@@ -203,7 +203,7 @@ class PerformanceAnalyzer:
 
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"  ✓ Monthly heatmap saved to {save_path}")
+            print(f"  [OK] Monthly heatmap saved to {save_path}")
         else:
             plt.show()
 
@@ -261,7 +261,7 @@ class PerformanceAnalyzer:
 
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"  ✓ Rolling metrics saved to {save_path}")
+            print(f"  [OK] Rolling metrics saved to {save_path}")
         else:
             plt.show()
 
@@ -293,7 +293,7 @@ class PerformanceAnalyzer:
         self.plot_rolling_metrics(strategy_name,
                                  save_path=f"{save_dir}/{strategy_name}_rolling.png")
 
-        print(f"\n  ✓ Tearsheet visualizations created in {save_dir}")
+        print(f"\n  [OK] Tearsheet visualizations created in {save_dir}")
 
     def print_performance_summary(self, metrics_df: pd.DataFrame):
         """Print formatted performance summary table."""

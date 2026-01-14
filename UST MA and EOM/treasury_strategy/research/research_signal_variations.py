@@ -109,7 +109,7 @@ def main():
     # Export
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     ma_results.to_excel(f'./output/research/signal_variations_{timestamp}.xlsx', index=False)
-    print(f"\n  ✓ Results saved to ./output/research/signal_variations_{timestamp}.xlsx")
+    print(f"\n  [OK] Results saved to ./output/research/signal_variations_{timestamp}.xlsx")
 
 
 if __name__ == "__main__":
