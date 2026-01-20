@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Print styles */
+@media print {
+  /* Hide sidebar and navigation when printing */
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  /* Make content full width when printing */
+  .print\\:w-full {
+    width: 100% !important;
+  }
+
+  /* Remove shadows and borders for cleaner print */
+  .print\\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  /* Better page breaks */
+  .break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Remove background colors for print */
+  body {
+    background: white !important;
+  }
+}
